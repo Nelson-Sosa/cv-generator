@@ -1,14 +1,20 @@
-const generatePDF = require("../utils/generatePDF");
-const improveCV = require("../utils/improveCV");
+// controllers/ai.controller.js
+const { generarTexto } = require("../services/geminiService");
 
-exports.generateCV = async (req, res) => {
-  let { cvData, template } = req.body;
+exports.generarCV = async (req, res) => {
+  try {
+    const { datos } = req.body;
 
-  // Mejorar cada campo de texto con IA
-  if (cvData.summary) cvData.summary = await improveCV(cvData.summary);
-  if (cvData.experience) cvData.experience = await improveCV(cvData.experience);
-  if (cvData.skills) cvData.skills = await improveCV(cvData.skills);
+    const prompt = `
+    Genera un CV profesional con estos datos:
+    ${datos}
+    `;
 
-  // Generar PDF con los textos mejorados
-  generatePDF({ cvData, template }, res);
+    const texto = await generarTexto(prompt);
+
+    res.json({ resultado: texto });
+
+  } catch (error) {
+    res.status(500).json({ error: "Error generando contenido" });
+  }
 };

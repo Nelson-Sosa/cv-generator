@@ -1,29 +1,35 @@
-const { Configuration, OpenAIApi } = require("openai");
+// server/utils/improveCV.js
 require("dotenv").config();
+const OpenAI = require("openai");
 
-const configuration = new Configuration({
+const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 async function improveCV(text) {
+  if (!text) return "";
+
   try {
-    const response = await openai.createChatCompletion({
+    const completion = await client.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "Actúa como un experto en recursos humanos. Mejora este texto de CV para que sea profesional, atractivo y listo para enviar a empleadores."
+          content: "Eres un experto en recursos humanos que mejora textos de CV haciéndolos más profesionales y atractivos.",
         },
-        { role: "user", content: text }
+        {
+          role: "user",
+          content: `Mejora este texto de CV:\n\n${text}`,
+        },
       ],
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: 300,
     });
 
-    return response.data.choices[0].message.content;
+    return completion.choices[0].message.content;
   } catch (error) {
-    console.error("Error mejorando CV:", error.message);
-    return text; // fallback: usar el texto original si falla la IA
+    console.error("Error en improveCV:", error.message);
+    return text; // fallback
   }
 }
 

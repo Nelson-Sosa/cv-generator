@@ -1,7 +1,5 @@
 const express = require("express")
 const router = express.Router()
-const cvController = require("../controllers/cvController")
+const AIController = require("./controllers/ai.controller");
 
-router.post("/generate", cvController.generateCV)
-
-module.exports = router
+router.post("/generar-cv", AIController.generarCV);
