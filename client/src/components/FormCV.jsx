@@ -26,13 +26,11 @@ export default function FormCV({ cvData, setCvData }) {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (error) {
-      console.error("Error generando PDF:", error);
-      alert("Ocurrió un error al generar el PDF");
-    }
-    setLoading(false);
-  };
-
+    } catch (err) {
+  console.error("Error en generatePDF:", err);
+  alert("Error generando PDF: " + err.message);
+}
+  }
   return (
     <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow space-y-4">
       <input type="text" name="name" placeholder="Nombre completo" className="w-full p-2 border rounded" onChange={handleChange} />

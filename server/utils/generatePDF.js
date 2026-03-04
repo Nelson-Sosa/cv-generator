@@ -1,28 +1,32 @@
-// server/utils/generatePDF.js
 const PDFDocument = require("pdfkit");
 
-function generatePDF({ cvData, template }, res) {
+function generatePDF({ cvData }, res) {
   const doc = new PDFDocument();
+  const buffers = [];
 
-  // Configurar headers para descargar PDF
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", "attachment; filename=CV.pdf");
+  doc.on("data", buffers.push.bind(buffers));
 
-  doc.pipe(res);
+  doc.on("end", () => {
+    const pdfData = Buffer.concat(buffers);
+    res
+      .writeHead(200, {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "attachment; filename=CV.pdf",
+        "Content-Length": pdfData.length,
+      })
+      .end(pdfData);
+  });
 
-  // Fondo según plantilla
-  if (template === "moderno") {
-    doc.fillColor("#333").fontSize(20).text(cvData.name, { underline: true });
-  } else {
-    doc.fillColor("#000").fontSize(18).text(cvData.name);
-  }
-
+  doc.fontSize(20).text(cvData.name || "Nombre");
   doc.moveDown();
-  doc.fontSize(12).fillColor("#000");
-  doc.text(`Email: ${cvData.email}`);
+  doc.fontSize(12).text(`Email: ${cvData.email}`);
+  doc.moveDown();
   doc.text(`Resumen: ${cvData.summary}`);
+  doc.moveDown();
   doc.text(`Experiencia: ${cvData.experience}`);
+  doc.moveDown();
   doc.text(`Educación: ${cvData.education}`);
+  doc.moveDown();
   doc.text(`Habilidades: ${cvData.skills}`);
 
   doc.end();

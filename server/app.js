@@ -1,11 +1,12 @@
-const express = require("express")
-const cors = require("cors")
-const cvRoutes = require("./routes/cvRoutes")
+const express = require("express");
+const cors = require("cors");
+const cvRoutes = require("./routes/cvRoutes");
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+const app = express();
 
-app.use("/api/cv", cvRoutes)
+app.use(cors());
+app.use(express.json());
 
-app.listen(5000, () => console.log("Server running on port 5000"))
+app.use("/api/cv", cvRoutes);
+
+app.listen(5000, () => console.log("Server running on port 5000"));

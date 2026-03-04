@@ -1,20 +1,18 @@
-// controllers/ai.controller.js
-const { generarTexto } = require("../services/geminiService");
+const generatePDF = require("../utils/generatePDF");
+const { generarTexto } = require("../services/geminiService"); // activar después si quieres IA
 
-exports.generarCV = async (req, res) => {
+exports.generateCV = async (req, res) => {
   try {
-    const { datos } = req.body;
+    const { cvData, template } = req.body;
 
-    const prompt = `
-    Genera un CV profesional con estos datos:
-    ${datos}
-    `;
+    // 👉 PRIMERO probamos sin IA
+    // Si quieres IA luego:
+    cvData.summary = await generarTexto(cvData.summary);
 
-    const texto = await generarTexto(prompt);
-
-    res.json({ resultado: texto });
+    generatePDF({ cvData, template }, res);
 
   } catch (error) {
-    res.status(500).json({ error: "Error generando contenido" });
+    console.error("Error en generateCV:", error);
+    res.status(500).json({ error: "Error generando el PDF" });
   }
 };
