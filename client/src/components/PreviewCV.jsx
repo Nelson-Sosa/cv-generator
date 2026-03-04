@@ -20,6 +20,12 @@ export default function PreviewCV({ cvData }) {
           <li key={i}>{edu.degree} en {edu.school}: {edu.description}</li>
         ))}
       </ul>
+      {cvData.skills && (
+        <>
+          <p><strong>Habilidades:</strong></p>
+          <p>{cvData.skills}</p>
+        </>
+      )}
     </div>
   );
 }

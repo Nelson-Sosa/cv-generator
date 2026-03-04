@@ -35,7 +35,10 @@ function generatePDF({ cvData }, res) {
   });
   doc.moveDown();
 
-  doc.text(`Habilidades: ${cvData.skills || ""}`);
+  if (cvData.skills) {
+    doc.text("Habilidades:");
+    doc.text(cvData.skills);
+  }
 
   doc.end();
 }

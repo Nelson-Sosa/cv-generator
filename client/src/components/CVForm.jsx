@@ -10,6 +10,7 @@ export default function CVForm({ cvData, setCvData }) {
   const [summary, setSummary] = useState("");
   const [experience, setExperience] = useState([]);
   const [education, setEducation] = useState([]);
+  const [skills, setSkills] = useState("");
   const [template, setTemplate] = useState("plantilla1");
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,7 @@ export default function CVForm({ cvData, setCvData }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await generateCV({ name, email, summary, experience, education, skills: "" }, template, true);
+      const res = await generateCV({ name, email, summary, experience, education, skills }, template, true);
       setCvData(res.cvData);
       alert("Preview generado correctamente");
     } catch (err) {
@@ -36,6 +37,11 @@ export default function CVForm({ cvData, setCvData }) {
       <textarea placeholder="Resumen profesional" value={summary} onChange={e => setSummary(e.target.value)} />
       <ExperienceInput experience={experience} setExperience={setExperience} />
       <EducationInput education={education} setEducation={setEducation} />
+      <textarea
+            placeholder="Habilidades (ej: JavaScript, React, Testing, Jira...)"
+            value={skills}
+            onChange={e => setSkills(e.target.value)}
+          />
       <TemplateSelector selected={template} setSelected={setTemplate} />
       <button type="submit" disabled={loading}>{loading ? "Generando..." : "Generar Preview"}</button>
     </form>
