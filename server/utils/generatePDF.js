@@ -5,29 +5,37 @@ function generatePDF({ cvData }, res) {
   const buffers = [];
 
   doc.on("data", buffers.push.bind(buffers));
-
   doc.on("end", () => {
     const pdfData = Buffer.concat(buffers);
-    res
-      .writeHead(200, {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": "attachment; filename=CV.pdf",
-        "Content-Length": pdfData.length,
-      })
-      .end(pdfData);
+    res.writeHead(200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename=CV.pdf",
+      "Content-Length": pdfData.length,
+    }).end(pdfData);
   });
 
-  doc.fontSize(20).text(cvData.name || "Nombre");
+  doc.fontSize(20).text(cvData.name || "Nombre Apellido");
   doc.moveDown();
   doc.fontSize(12).text(`Email: ${cvData.email}`);
   doc.moveDown();
   doc.text(`Resumen: ${cvData.summary}`);
   doc.moveDown();
-  doc.text(`Experiencia: ${cvData.experience}`);
+
+  doc.text("Experiencia:");
+  cvData.experience.forEach(exp => {
+    doc.text(`- ${exp.position} en ${exp.company} (${exp.startDate} - ${exp.endDate})`);
+    doc.text(`  ${exp.description}`);
+  });
   doc.moveDown();
-  doc.text(`Educación: ${cvData.education}`);
+
+  doc.text("Educación:");
+  cvData.education.forEach(edu => {
+    doc.text(`- ${edu.degree} en ${edu.school} (${edu.startDate} - ${edu.endDate})`);
+    doc.text(`  ${edu.description}`);
+  });
   doc.moveDown();
-  doc.text(`Habilidades: ${cvData.skills}`);
+
+  doc.text(`Habilidades: ${cvData.skills || ""}`);
 
   doc.end();
 }

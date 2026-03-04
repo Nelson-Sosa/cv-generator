@@ -1,15 +1,18 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash" // recomendable para free tier
-});
+const axios = require("axios");
 
 async function generarTexto(prompt) {
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return response.text();
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    const response = await axios.post(
+      url,
+      { contents: [{ parts: [{ text: prompt }] }] },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return response.data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+  } catch (error) {
+    console.error("Error en generarTexto:", error.response?.data || error.message);
+    return null;
+  }
 }
 
-module.exports = { generarTexto };
+module.exports = { generarTexto }; // ✅ Bug 2 solucionado
