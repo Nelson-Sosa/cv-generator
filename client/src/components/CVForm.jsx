@@ -52,7 +52,8 @@ const progress = Math.round((completedFields / totalFields) * 100);
       ...res.cvData,
       linkedin,
       github,
-      portfolio
+      portfolio,
+      photo //
     });
   } catch (err) {
     console.error(err);
