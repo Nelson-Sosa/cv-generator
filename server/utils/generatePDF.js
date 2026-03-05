@@ -1,9 +1,10 @@
 const PDFDocument = require("pdfkit");
 
 function generatePDF({ cvData, template }, res) {
-  const doc = new PDFDocument({ margin: 0 });
-  const buffers = [];
+  const doc = new PDFDocument({ margin: 0, autoFirstPage: false });
+  doc.addPage({ margin: 0, size: 'A4' });
 
+  const buffers = [];
   doc.on("data", buffers.push.bind(buffers));
   doc.on("end", () => {
     const pdfData = Buffer.concat(buffers);
@@ -25,34 +26,54 @@ function generatePDF({ cvData, template }, res) {
   doc.end();
 }
 
+// helper para línea de redes
+function renderRedes(doc, cv, x, y, width, color) {
+  const parts = [];
+  if (cv.linkedin) parts.push(`in: ${cv.linkedin}`);
+  if (cv.github) parts.push(`gh: ${cv.github}`);
+  if (cv.portfolio) parts.push(`web: ${cv.portfolio}`);
+  if (parts.length === 0) return y;
+  doc.fontSize(9).font("Helvetica").fillColor(color)
+    .text(parts.join("   "), x, y, { width, lineBreak: false });
+  return doc.y + 6;
+}
+
 // ── Plantilla 1: Moderna Azul ──────────────────────────────
 function renderModernaAzul(doc, cv) {
-  const sidebarWidth = 200;  // ✅ más ancho (era 180)
+  const sidebarWidth = 200;
   const pageHeight = 842;
   const primaryColor = "#4f46e5";
   const accentColor = "#7c3aed";
 
   doc.rect(0, 0, sidebarWidth, pageHeight).fill(primaryColor);
 
-  // Nombre
-  doc.fillColor("white").fontSize(20).font("Helvetica-Bold")  // ✅ era 16
+  doc.fillColor("white").fontSize(20).font("Helvetica-Bold")
     .text(cv.name || "", 15, 40, { width: sidebarWidth - 30 });
-
-  // Email
-  doc.fontSize(11).font("Helvetica").fillColor("rgba(255,255,255,0.7)")  // ✅ era 9
+  doc.fontSize(11).font("Helvetica").fillColor("rgba(255,255,255,0.7)")
     .text(cv.email || "", 15, doc.y + 8, { width: sidebarWidth - 30 });
 
-  // Habilidades en sidebar
+  // Redes en sidebar
+  if (cv.linkedin || cv.github || cv.portfolio) {
+    doc.moveDown(0.5);
+    doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")
+      .text("CONTACTO", 15, doc.y, { width: sidebarWidth - 30 });
+    doc.moveDown(0.3);
+    if (cv.linkedin) doc.fontSize(9).font("Helvetica").fillColor("white")
+      .text(`in  ${cv.linkedin}`, 15, doc.y, { width: sidebarWidth - 30 });
+    if (cv.github) doc.fontSize(9).font("Helvetica").fillColor("white")
+      .text(`gh  ${cv.github}`, 15, doc.y, { width: sidebarWidth - 30 });
+    if (cv.portfolio) doc.fontSize(9).font("Helvetica").fillColor("white")
+      .text(`web  ${cv.portfolio}`, 15, doc.y, { width: sidebarWidth - 30 });
+  }
+
   if (cv.skills) {
-    doc.moveDown(2);
-    doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")  // ✅ era 8
+    doc.moveDown(1.5);
+    doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")
       .text("HABILIDADES", 15, doc.y, { width: sidebarWidth - 30 });
     doc.moveDown(0.5);
-
-    // ✅ Filtra skills vacíos
     const skillsList = cv.skills.split(",").map(s => s.trim()).filter(Boolean);
     skillsList.forEach(skill => {
-      doc.fontSize(11).font("Helvetica").fillColor("white")  // ✅ era 9
+      doc.fontSize(11).font("Helvetica").fillColor("white")
         .text(`• ${skill}`, 15, doc.y, { width: sidebarWidth - 30 });
     });
   }
@@ -61,32 +82,30 @@ function renderModernaAzul(doc, cv) {
   const mainWidth = 595 - sidebarWidth - 48;
   let y = 40;
 
-  // Resumen
   if (cv.summary) {
-    doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)  // ✅ era 8
+    doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)
       .text("PERFIL PROFESIONAL", mainX, y);
     y += 16;
-    doc.fontSize(11).font("Helvetica").fillColor("#374151")  // ✅ era 10
+    doc.fontSize(11).font("Helvetica").fillColor("#374151")
       .text(cv.summary, mainX, y, { width: mainWidth });
     y = doc.y + 18;
     doc.moveTo(mainX, y).lineTo(mainX + mainWidth, y).stroke("#e5e7eb");
     y += 14;
   }
 
-  // Experiencia
   if (cv.experience?.length > 0) {
     doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)
       .text("EXPERIENCIA", mainX, y);
     y += 16;
     cv.experience.forEach(exp => {
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827")  // ✅ era 11
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827")
         .text(exp.position || "", mainX, y, { width: mainWidth });
       y = doc.y + 2;
-      doc.fontSize(11).font("Helvetica").fillColor(accentColor)  // ✅ era 9
+      doc.fontSize(11).font("Helvetica").fillColor(accentColor)
         .text(`${exp.company}  |  ${exp.startDate} — ${exp.endDate}`, mainX, y);
       y = doc.y + 6;
       if (exp.description) {
-        doc.fontSize(11).font("Helvetica").fillColor("#6b7280")  // ✅ era 9
+        doc.fontSize(11).font("Helvetica").fillColor("#6b7280")
           .text(exp.description, mainX, y, { width: mainWidth });
         y = doc.y + 12;
       }
@@ -96,20 +115,19 @@ function renderModernaAzul(doc, cv) {
     y += 14;
   }
 
-  // Educación
   if (cv.education?.length > 0) {
     doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)
       .text("EDUCACIÓN", mainX, y);
     y += 16;
     cv.education.forEach(edu => {
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827")  // ✅ era 11
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827")
         .text(edu.degree || "", mainX, y, { width: mainWidth });
       y = doc.y + 2;
-      doc.fontSize(11).font("Helvetica").fillColor(accentColor)  // ✅ era 9
+      doc.fontSize(11).font("Helvetica").fillColor(accentColor)
         .text(`${edu.school}  |  ${edu.startDate} — ${edu.endDate}`, mainX, y);
       y = doc.y + 6;
       if (edu.description) {
-        doc.fontSize(11).font("Helvetica").fillColor("#6b7280")  // ✅ era 9
+        doc.fontSize(11).font("Helvetica").fillColor("#6b7280")
           .text(edu.description, mainX, y, { width: mainWidth });
         y = doc.y + 12;
       }
@@ -123,28 +141,35 @@ function renderMinimalista(doc, cv) {
   const width = 595 - margin * 2;
   let y = 50;
 
-  // Nombre
   doc.fontSize(28).font("Helvetica-Bold").fillColor("#111827")
     .text(cv.name || "", margin, y);
-  y = doc.y + 6;
+  y = doc.y + 4;
 
-  // Email
   doc.fontSize(12).font("Helvetica").fillColor("#6b7280")
     .text(cv.email || "", margin, y);
-  y = doc.y + 20;
+  y = doc.y + 4;
 
-  // Línea separadora
+  // Redes en una línea
+  if (cv.linkedin || cv.github || cv.portfolio) {
+    const parts = [];
+    if (cv.linkedin) parts.push(`in: ${cv.linkedin}`);
+    if (cv.github) parts.push(`gh: ${cv.github}`);
+    if (cv.portfolio) parts.push(`🌐 ${cv.portfolio}`);
+    doc.fontSize(10).font("Helvetica").fillColor("#9ca3af")
+      .text(parts.join("   "), margin, y, { width });
+    y = doc.y + 4;
+  }
+
+  y += 12;
   doc.moveTo(margin, y).lineTo(margin + width, y).lineWidth(2).stroke("#111827");
   y += 20;
 
-  // Resumen
   if (cv.summary) {
     doc.fontSize(12).font("Helvetica").fillColor("#374151")
       .text(cv.summary, margin, y, { width, lineGap: 4 });
     y = doc.y + 24;
   }
 
-  // Experiencia
   if (cv.experience?.length > 0) {
     doc.fontSize(10).font("Helvetica-Bold").fillColor("#111827")
       .text("EXPERIENCIA", margin, y);
@@ -165,7 +190,6 @@ function renderMinimalista(doc, cv) {
     y += 6;
   }
 
-  // Educación
   if (cv.education?.length > 0) {
     doc.fontSize(10).font("Helvetica-Bold").fillColor("#111827")
       .text("EDUCACIÓN", margin, y);
@@ -186,7 +210,6 @@ function renderMinimalista(doc, cv) {
     y += 6;
   }
 
-  // Habilidades
   if (cv.skills) {
     doc.fontSize(10).font("Helvetica-Bold").fillColor("#111827")
       .text("HABILIDADES", margin, y);
@@ -202,85 +225,93 @@ function renderEjecutivaVerde(doc, cv) {
   const width = 595 - margin * 2;
   const green = "#166534";
   const lightGreen = "#16a34a";
-  const headerHeight = 100; // ✅ altura fija, sin cálculo dinámico
 
-  // ✅ Primero dibuja el rect
-  doc.rect(0, 0, 595, headerHeight).fill(green);
-
-  // ✅ Luego escribe el texto encima
+  doc.rect(0, 0, 595, 90).fill(green);
   doc.fontSize(26).font("Helvetica-Bold").fillColor("white")
-    .text(cv.name || "", margin, 28, { width });
-
+    .text(cv.name || "", margin, 20, { width, lineBreak: false });
   doc.fontSize(12).font("Helvetica").fillColor("rgba(255,255,255,0.85)")
-    .text(cv.email || "", margin, 68, { width }); // ✅ posición Y fija
+    .text(cv.email || "", margin, 52, { width, lineBreak: false });
 
-  let y = headerHeight + 24;
-
-  // Resumen
-  if (cv.summary) {
-    doc.fontSize(10).font("Helvetica-Bold").fillColor(green)
-      .text("PERFIL", margin, y);
-    y = doc.y + 8;
-    doc.fontSize(12).font("Helvetica").fillColor("#374151")
-      .text(cv.summary, margin, y, { width, lineGap: 4 });
-    y = doc.y + 18;
-    doc.moveTo(margin, y).lineTo(margin + width, y).lineWidth(1).stroke("#d1fae5");
-    y += 16;
+  // Redes en header
+  if (cv.linkedin || cv.github || cv.portfolio) {
+    const parts = [];
+    if (cv.linkedin) parts.push(`in: ${cv.linkedin}`);
+    if (cv.github) parts.push(`gh: ${cv.github}`);
+    if (cv.portfolio) parts.push(`web: ${cv.portfolio}`);
+    doc.fontSize(9).font("Helvetica").fillColor("rgba(255,255,255,0.65)")
+      .text(parts.join("   "), margin, 68, { width, lineBreak: false });
   }
 
-  // Experiencia
+  let y = 106;
+
+  if (cv.summary) {
+    const cleanSummary = cv.summary.replace(/^[-*•\s]+/, "").trim();
+    doc.fontSize(10).font("Helvetica-Bold").fillColor(green)
+      .text("PERFIL", margin, y, { lineBreak: false });
+    y += 18;
+    doc.fontSize(12).font("Helvetica").fillColor("#374151")
+      .text(cleanSummary, margin, y, { width, lineGap: 4 });
+    y = doc.y + 14;
+    doc.moveTo(margin, y).lineTo(margin + width, y).lineWidth(1).stroke("#d1fae5");
+    y += 14;
+  }
+
   if (cv.experience?.length > 0) {
     doc.fontSize(10).font("Helvetica-Bold").fillColor(green)
-      .text("EXPERIENCIA", margin, y);
-    y = doc.y + 10;
+      .text("EXPERIENCIA", margin, y, { lineBreak: false });
+    y += 18;
     cv.experience.forEach(exp => {
       doc.fontSize(14).font("Helvetica-Bold").fillColor("#111827")
-        .text(exp.position || "", margin, y);
+        .text(exp.position || "", margin, y, { width });
       y = doc.y + 2;
       doc.fontSize(12).font("Helvetica").fillColor(lightGreen)
-        .text(`${exp.company} · ${exp.startDate} — ${exp.endDate}`, margin, y);
+        .text(`${exp.company} · ${exp.startDate} — ${exp.endDate}`, margin, y, { width });
       y = doc.y + 6;
       if (exp.description) {
+        const cleanDesc = exp.description.replace(/^[-*•\s]+/, "").trim();
         doc.fontSize(12).font("Helvetica").fillColor("#6b7280")
-          .text(exp.description, margin, y, { width, lineGap: 3 });
-        y = doc.y + 14;
+          .text(cleanDesc, margin, y, { width, lineGap: 3 });
+        y = doc.y + 12;
       }
     });
-    y += 6;
+    y += 4;
     doc.moveTo(margin, y).lineTo(margin + width, y).lineWidth(1).stroke("#d1fae5");
-    y += 16;
+    y += 14;
   }
 
-  // Educación
   if (cv.education?.length > 0) {
     doc.fontSize(10).font("Helvetica-Bold").fillColor(green)
-      .text("EDUCACIÓN", margin, y);
-    y = doc.y + 10;
+      .text("EDUCACIÓN", margin, y, { lineBreak: false });
+    y += 18;
     cv.education.forEach(edu => {
       doc.fontSize(14).font("Helvetica-Bold").fillColor("#111827")
-        .text(edu.degree || "", margin, y);
+        .text(edu.degree || "", margin, y, { width });
       y = doc.y + 2;
       doc.fontSize(12).font("Helvetica").fillColor(lightGreen)
-        .text(`${edu.school} · ${edu.startDate} — ${edu.endDate}`, margin, y);
+        .text(`${edu.school} · ${edu.startDate} — ${edu.endDate}`, margin, y, { width });
       y = doc.y + 6;
       if (edu.description) {
+        const cleanDesc = edu.description.replace(/^[-*•\s]+/, "").trim();
         doc.fontSize(12).font("Helvetica").fillColor("#6b7280")
-          .text(edu.description, margin, y, { width, lineGap: 3 });
-        y = doc.y + 14;
+          .text(cleanDesc, margin, y, { width, lineGap: 3 });
+        y = doc.y + 12;
       }
     });
-    y += 6;
+    y += 4;
   }
 
-  // Habilidades
   if (cv.skills) {
     doc.fontSize(10).font("Helvetica-Bold").fillColor(green)
-      .text("HABILIDADES", margin, y);
-    y = doc.y + 8;
+      .text("HABILIDADES", margin, y, { lineBreak: false });
+    y += 18;
     const skillsList = cv.skills.split(",").map(s => s.trim()).filter(Boolean);
     doc.fontSize(12).font("Helvetica").fillColor("#374151")
       .text(skillsList.join(", "), margin, y, { width });
   }
-} 
+}
 
 module.exports = generatePDF;
+```
+
+Las redes aparecen en el header de cada plantilla — en la sidebar de la azul, debajo del email en la minimalista, y en el banner verde de la ejecutiva. El commit sería:
+```

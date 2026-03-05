@@ -3,6 +3,9 @@ import React from "react";
 const mockData = {
   name: "María González",
   email: "maria.gonzalez@gmail.com",
+  linkedin: "linkedin.com/in/maria-gonzalez",
+  github: "github.com/mariagonzalez",
+  portfolio: "mariagonzalez.dev",
   summary: "Desarrolladora frontend con 3 años de experiencia construyendo interfaces modernas con React y TypeScript. Apasionada por el diseño y la experiencia de usuario.",
   experience: [
     {
@@ -32,7 +35,8 @@ const templateStyles = {
     headerSubtext: "text-violet-200",
     accent: "text-violet-700",
     border: "border-violet-300",
-    tag: "bg-violet-100 text-violet-700"
+    tag: "bg-violet-100 text-violet-700",
+    link: "text-violet-300"
   },
   plantilla2: {
     header: "bg-gray-900",
@@ -40,7 +44,8 @@ const templateStyles = {
     headerSubtext: "text-gray-400",
     accent: "text-gray-700",
     border: "border-gray-300",
-    tag: "bg-gray-100 text-gray-700"
+    tag: "bg-gray-100 text-gray-700",
+    link: "text-gray-400"
   },
   plantilla3: {
     header: "bg-green-800",
@@ -48,7 +53,8 @@ const templateStyles = {
     headerSubtext: "text-green-200",
     accent: "text-green-700",
     border: "border-green-300",
-    tag: "bg-green-100 text-green-700"
+    tag: "bg-green-100 text-green-700",
+    link: "text-green-200"
   }
 };
 
@@ -60,20 +66,37 @@ export default function PreviewCV({ cvData, template = "plantilla1" }) {
   return (
     <div className="relative">
 
-      {/* Banner demo */}
       {isDemo && (
         <div className="mb-4 px-3 py-2 bg-violet-900/40 border border-violet-700/50 rounded-xl text-xs text-violet-300 text-center">
           👆 Así se verá tu CV — completá el formulario y hacé clic en <strong>Generar Preview</strong>
         </div>
       )}
 
-      {/* CV card */}
       <div className={`bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl ${isDemo ? "opacity-60" : ""}`}>
 
         {/* Header */}
         <div className={`${styles.header} px-6 py-5`}>
           <h2 className={`text-xl font-bold ${styles.headerText}`}>{data.name}</h2>
           <p className={`text-sm mt-1 ${styles.headerSubtext}`}>{data.email}</p>
+
+          {/* Redes sociales en header */}
+          <div className="flex flex-wrap gap-3 mt-2">
+            {data.linkedin && (
+              <span className={`text-xs flex items-center gap-1 ${styles.link}`}>
+                <span className="font-bold">in</span> {data.linkedin}
+              </span>
+            )}
+            {data.github && (
+              <span className={`text-xs flex items-center gap-1 ${styles.link}`}>
+                <span>⌥</span> {data.github}
+              </span>
+            )}
+            {data.portfolio && (
+              <span className={`text-xs flex items-center gap-1 ${styles.link}`}>
+                <span>🌐</span> {data.portfolio}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="p-6 flex flex-col gap-5">
@@ -161,7 +184,6 @@ export default function PreviewCV({ cvData, template = "plantilla1" }) {
         </div>
       </div>
 
-      {/* Overlay demo */}
       {isDemo && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span className="bg-gray-900/80 text-gray-300 text-xs px-4 py-2 rounded-full border border-gray-700">

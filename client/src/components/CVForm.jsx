@@ -7,6 +7,9 @@ import { generateCV } from "../api";
 export default function CVForm({ cvData, setCvData, template, setTemplate }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [github, setGithub] = useState("");
+  const [portfolio, setPortfolio] = useState("");
   const [summary, setSummary] = useState("");
   const [experience, setExperience] = useState([]);
   const [education, setEducation] = useState([]);
@@ -18,7 +21,7 @@ export default function CVForm({ cvData, setCvData, template, setTemplate }) {
     setLoading(true);
     try {
       const res = await generateCV(
-        { name, email, summary, experience, education, skills },
+        { name, email, linkedin, github, portfolio, summary, experience, education, skills },
         template,
         true
       );
@@ -59,6 +62,53 @@ export default function CVForm({ cvData, setCvData, template, setTemplate }) {
           onChange={e => setEmail(e.target.value)}
           required
         />
+      </div>
+
+      {/* Redes sociales */}
+      <div className="border-t border-gray-800 pt-4">
+        <h3 className="text-sm font-semibold text-gray-300 mb-3">Redes sociales</h3>
+        <div className="flex flex-col gap-3">
+
+          <div>
+            <label className={labelClass}>LinkedIn</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">in</span>
+              <input
+                className={`${inputClass} pl-8`}
+                placeholder="linkedin.com/in/tu-perfil"
+                value={linkedin}
+                onChange={e => setLinkedin(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>GitHub</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">⌥</span>
+              <input
+                className={`${inputClass} pl-8`}
+                placeholder="github.com/tu-usuario"
+                value={github}
+                onChange={e => setGithub(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Portfolio</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🌐</span>
+              <input
+                className={`${inputClass} pl-8`}
+                placeholder="tuportfolio.com"
+                value={portfolio}
+                onChange={e => setPortfolio(e.target.value)}
+              />
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <div>
