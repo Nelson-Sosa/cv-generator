@@ -68,6 +68,7 @@ if (cvData.education.length > 0) {
     }
 
     // Generar PDF final
+    console.log("Template recibido:", template); // ✅ agregá esta línea temporalmente
     generatePDF({ cvData: improvedCV, template }, res);
 
   } catch (error) {

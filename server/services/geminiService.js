@@ -1,21 +1,23 @@
 const axios = require("axios");
 
-async function generarTexto(prompt, retries = 3) {
+async function generarTexto(prompt) {
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
     const response = await axios.post(
-      url,
-      { contents: [{ parts: [{ text: prompt }] }] },
-      { headers: { "Content-Type": "application/json" } }
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 500
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+        }
+      }
     );
-    return response.data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    return response.data.choices?.[0]?.message?.content || null;
   } catch (error) {
-    const status = error.response?.data?.error?.code;
-    if (status === 429 && retries > 0) {
-      console.log(`Rate limit alcanzado. Reintentando en 60s... (${retries} intentos restantes)`);
-      await new Promise(resolve => setTimeout(resolve, 60000));
-      return generarTexto(prompt, retries - 1);
-    }
     console.error("Error en generarTexto:", error.response?.data || error.message);
     return null;
   }
