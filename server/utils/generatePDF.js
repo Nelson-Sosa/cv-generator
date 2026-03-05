@@ -26,16 +26,19 @@ function generatePDF({ cvData, template }, res) {
   doc.end();
 }
 
-// helper para línea de redes
-function renderRedes(doc, cv, x, y, width, color) {
-  const parts = [];
-  if (cv.linkedin) parts.push(`in: ${cv.linkedin}`);
-  if (cv.github) parts.push(`gh: ${cv.github}`);
-  if (cv.portfolio) parts.push(`web: ${cv.portfolio}`);
-  if (parts.length === 0) return y;
-  doc.fontSize(9).font("Helvetica").fillColor(color)
-    .text(parts.join("   "), x, y, { width, lineBreak: false });
-  return doc.y + 6;
+// ── Helper: dibujar foto circular ─────────────────────────
+function drawPhoto(doc, base64, x, y, size) {
+  if (!base64) return;
+  try {
+    const data = base64.split(";base64,")[1];
+    const buffer = Buffer.from(data, "base64");
+    doc.save();
+    doc.circle(x + size / 2, y + size / 2, size / 2).clip();
+    doc.image(buffer, x, y, { width: size, height: size });
+    doc.restore();
+  } catch (e) {
+    // Si falla la foto, continúa sin ella
+  }
 }
 
 // ── Plantilla 1: Moderna Azul ──────────────────────────────
@@ -47,34 +50,54 @@ function renderModernaAzul(doc, cv) {
 
   doc.rect(0, 0, sidebarWidth, pageHeight).fill(primaryColor);
 
+  let sidebarY = 30;
+
+  // Foto en sidebar (opcional)
+  if (cv.photo) {
+    drawPhoto(doc, cv.photo, 55, sidebarY, 90);
+    sidebarY += 100;
+  }
+
   doc.fillColor("white").fontSize(20).font("Helvetica-Bold")
-    .text(cv.name || "", 15, 40, { width: sidebarWidth - 30 });
+    .text(cv.name || "", 15, sidebarY, { width: sidebarWidth - 30 });
+  sidebarY = doc.y + 6;
+
   doc.fontSize(11).font("Helvetica").fillColor("rgba(255,255,255,0.7)")
-    .text(cv.email || "", 15, doc.y + 8, { width: sidebarWidth - 30 });
+    .text(cv.email || "", 15, sidebarY, { width: sidebarWidth - 30 });
+  sidebarY = doc.y + 8;
 
   // Redes en sidebar
   if (cv.linkedin || cv.github || cv.portfolio) {
-    doc.moveDown(0.5);
     doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")
-      .text("CONTACTO", 15, doc.y, { width: sidebarWidth - 30 });
-    doc.moveDown(0.3);
-    if (cv.linkedin) doc.fontSize(9).font("Helvetica").fillColor("white")
-      .text(`in  ${cv.linkedin}`, 15, doc.y, { width: sidebarWidth - 30 });
-    if (cv.github) doc.fontSize(9).font("Helvetica").fillColor("white")
-      .text(`gh  ${cv.github}`, 15, doc.y, { width: sidebarWidth - 30 });
-    if (cv.portfolio) doc.fontSize(9).font("Helvetica").fillColor("white")
-      .text(`web  ${cv.portfolio}`, 15, doc.y, { width: sidebarWidth - 30 });
+      .text("CONTACTO", 15, sidebarY, { width: sidebarWidth - 30 });
+    sidebarY = doc.y + 4;
+    if (cv.linkedin) {
+      doc.fontSize(9).font("Helvetica").fillColor("white")
+        .text(`in  ${cv.linkedin}`, 15, sidebarY, { width: sidebarWidth - 30 });
+      sidebarY = doc.y + 2;
+    }
+    if (cv.github) {
+      doc.fontSize(9).font("Helvetica").fillColor("white")
+        .text(`gh  ${cv.github}`, 15, sidebarY, { width: sidebarWidth - 30 });
+      sidebarY = doc.y + 2;
+    }
+    if (cv.portfolio) {
+      doc.fontSize(9).font("Helvetica").fillColor("white")
+        .text(`web  ${cv.portfolio}`, 15, sidebarY, { width: sidebarWidth - 30 });
+      sidebarY = doc.y + 2;
+    }
+    sidebarY += 8;
   }
 
   if (cv.skills) {
-    doc.moveDown(1.5);
     doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")
-      .text("HABILIDADES", 15, doc.y, { width: sidebarWidth - 30 });
-    doc.moveDown(0.5);
+      .text("HABILIDADES", 15, sidebarY, { width: sidebarWidth - 30 });
+    sidebarY = doc.y + 4;
     const skillsList = cv.skills.split(",").map(s => s.trim()).filter(Boolean);
     skillsList.forEach(skill => {
       doc.fontSize(11).font("Helvetica").fillColor("white")
-        .text(`• ${skill}`, 15, doc.y, { width: sidebarWidth - 30 });
+        .text(`• ${skill}`, 15, sidebarY, { width: sidebarWidth - 30 });
+      sidebarY = doc.y;
     });
   }
 
@@ -141,20 +164,24 @@ function renderMinimalista(doc, cv) {
   const width = 595 - margin * 2;
   let y = 50;
 
+  // Foto a la derecha del nombre (opcional)
+  if (cv.photo) {
+    drawPhoto(doc, cv.photo, 595 - margin - 70, y, 70);
+  }
+
   doc.fontSize(28).font("Helvetica-Bold").fillColor("#111827")
-    .text(cv.name || "", margin, y);
+    .text(cv.name || "", margin, y, { width: cv.photo ? width - 80 : width });
   y = doc.y + 4;
 
   doc.fontSize(12).font("Helvetica").fillColor("#6b7280")
     .text(cv.email || "", margin, y);
   y = doc.y + 4;
 
-  // Redes en una línea
   if (cv.linkedin || cv.github || cv.portfolio) {
     const parts = [];
     if (cv.linkedin) parts.push(`in: ${cv.linkedin}`);
     if (cv.github) parts.push(`gh: ${cv.github}`);
-    if (cv.portfolio) parts.push(`🌐 ${cv.portfolio}`);
+    if (cv.portfolio) parts.push(`web: ${cv.portfolio}`);
     doc.fontSize(10).font("Helvetica").fillColor("#9ca3af")
       .text(parts.join("   "), margin, y, { width });
     y = doc.y + 4;
@@ -227,12 +254,17 @@ function renderEjecutivaVerde(doc, cv) {
   const lightGreen = "#16a34a";
 
   doc.rect(0, 0, 595, 90).fill(green);
+
+  // Foto en header (opcional)
+  if (cv.photo) {
+    drawPhoto(doc, cv.photo, 595 - margin - 60, 15, 60);
+  }
+
   doc.fontSize(26).font("Helvetica-Bold").fillColor("white")
-    .text(cv.name || "", margin, 20, { width, lineBreak: false });
+    .text(cv.name || "", margin, 20, { width: cv.photo ? width - 70 : width, lineBreak: false });
   doc.fontSize(12).font("Helvetica").fillColor("rgba(255,255,255,0.85)")
     .text(cv.email || "", margin, 52, { width, lineBreak: false });
 
-  // Redes en header
   if (cv.linkedin || cv.github || cv.portfolio) {
     const parts = [];
     if (cv.linkedin) parts.push(`in: ${cv.linkedin}`);
@@ -313,5 +345,6 @@ function renderEjecutivaVerde(doc, cv) {
 module.exports = generatePDF;
 ```
 
-Las redes aparecen en el header de cada plantilla — en la sidebar de la azul, debajo del email en la minimalista, y en el banner verde de la ejecutiva. El commit sería:
+El commit:
 ```
+feat: add optional profile photo to form, preview and PDF templates

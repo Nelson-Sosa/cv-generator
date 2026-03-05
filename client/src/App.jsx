@@ -6,6 +6,7 @@ import { downloadPDF } from "./api";
 export default function App() {
   const [cvData, setCvData] = useState(null);
   const [template, setTemplate] = useState("plantilla1");
+  const [openFAQ, setOpenFAQ] = useState(null);
 
   const handleDownloadPDF = async () => {
     try {
@@ -23,6 +24,25 @@ export default function App() {
       alert("Error al descargar PDF");
     }
   };
+
+  const faqs = [
+  {
+    question: "¿Mis datos están seguros?",
+    answer: "Sí, tu información está protegida y nunca se comparte con terceros."
+  },
+  {
+    question: "¿Necesito crear una cuenta?",
+    answer: "No, puedes generar tu CV sin registro alguno, completamente gratis."
+  },
+  {
+    question: "¿Puedo modificar el CV después?",
+    answer: "Sí, todos los campos son editables y puedes guardar tu progreso automáticamente."
+  },
+  {
+    question: "¿Puedo usar la IA para generar mi resumen profesional?",
+    answer: "Sí, al generar el preview, nuestra IA sugerirá un resumen profesional optimizado."
+  }
+];
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -84,6 +104,7 @@ export default function App() {
         </div>
 
       </main>
+      
 
       {/* Footer */}
       <footer className="text-center text-gray-700 text-xs pb-8">
