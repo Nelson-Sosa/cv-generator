@@ -41,125 +41,123 @@ function drawPhoto(doc, base64, x, y, size) {
   }
 }
 
-// ── Plantilla 1: Moderna Azul ──────────────────────────────
-function renderModernaAzul(doc, cv) {
-  const sidebarWidth = 200;
-  const pageHeight = 842;
-  const primaryColor = "#4f46e5";
-  const accentColor = "#7c3aed";
+// ── Plantilla 1: Moderna Azul — fiel al PDF ────────────────
+function PreviewPlantilla1({ data }) {
+  const initials = data.name?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
 
-  doc.rect(0, 0, sidebarWidth, pageHeight).fill(primaryColor);
+  return (
+    <div className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl flex">
 
-  let sidebarY = 20;
+      {/* Sidebar violeta — ancho fijo como en el PDF */}
+      <div className="bg-violet-700 flex flex-col items-center py-4 gap-2 flex-shrink-0" style={{ width: "33%" }}>
 
-// Foto centrada en sidebar (opcional)
-if (cv.photo) {
-  const photoSize = 90;
-  const photoX = (sidebarWidth - photoSize) / 2; // ✅ centrado exacto
-  drawPhoto(doc, cv.photo, photoX, sidebarY, photoSize);
-  sidebarY += photoSize + 14;
+        {/* Foto o iniciales */}
+        {data.photo ? (
+          <img src={data.photo} alt="Foto"
+            className="w-16 h-16 rounded-full object-cover border-2 border-violet-300" />
+        ) : (
+          <div className="w-16 h-16 rounded-full border-2 border-violet-300 flex items-center justify-center bg-white/20">
+            <span className="text-lg font-bold text-white">{initials}</span>
+          </div>
+        )}
+
+        {/* Nombre y email */}
+        <p className="text-xs font-bold text-white text-center px-2 leading-tight">{data.name}</p>
+        <p className="text-xs text-violet-200 text-center px-2 leading-tight break-all">{data.email}</p>
+
+        {/* Contacto */}
+        {(data.linkedin || data.github || data.portfolio) && (
+          <div className="w-full px-2 mt-1">
+            <p className="text-xs font-bold text-violet-300 uppercase tracking-wide mb-1">Contacto</p>
+            {data.linkedin && (
+              <p className="text-xs text-white leading-tight mb-0.5 overflow-hidden" style={{ fontSize: "9px" }}>
+                in {data.linkedin}
+              </p>
+            )}
+            {data.github && (
+              <p className="text-xs text-white leading-tight mb-0.5 overflow-hidden" style={{ fontSize: "9px" }}>
+                gh {data.github}
+              </p>
+            )}
+            {data.portfolio && (
+              <p className="text-xs text-white leading-tight mb-0.5 overflow-hidden" style={{ fontSize: "9px" }}>
+                web {data.portfolio}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Habilidades */}
+        {data.skills && (
+          <div className="w-full px-2 mt-1">
+            <p className="text-xs font-bold text-violet-300 uppercase tracking-wide mb-1">Habilidades</p>
+            {data.skills.split(",").map((s, i) => (
+              <p key={i} className="text-white leading-tight" style={{ fontSize: "9px" }}>• {s.trim()}</p>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Contenido principal */}
+      <div className="flex-1 px-3 py-4 flex flex-col gap-3 overflow-hidden">
+
+        {data.summary && (
+          <div>
+            <p className="font-bold text-violet-700 uppercase tracking-wide mb-1" style={{ fontSize: "8px" }}>
+              Perfil Profesional
+            </p>
+            <p className="text-gray-600 leading-relaxed" style={{ fontSize: "9px" }}>{data.summary}</p>
+            <div className="mt-2 border-t border-gray-200" />
+          </div>
+        )}
+
+        {data.experience?.length > 0 && (
+          <div>
+            <p className="font-bold text-violet-700 uppercase tracking-wide mb-1" style={{ fontSize: "8px" }}>
+              Experiencia
+            </p>
+            <div className="flex flex-col gap-2">
+              {data.experience.map((exp, i) => (
+                <div key={i}>
+                  <p className="font-bold text-gray-900 leading-tight" style={{ fontSize: "11px" }}>{exp.position}</p>
+                  <p className="text-violet-600 leading-tight" style={{ fontSize: "9px" }}>
+                    {exp.company} | {exp.startDate} — {exp.endDate}
+                  </p>
+                  {exp.description && (
+                    <p className="text-gray-500 leading-relaxed mt-0.5" style={{ fontSize: "9px" }}>{exp.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 border-t border-gray-200" />
+          </div>
+        )}
+
+        {data.education?.length > 0 && (
+          <div>
+            <p className="font-bold text-violet-700 uppercase tracking-wide mb-1" style={{ fontSize: "8px" }}>
+              Educación
+            </p>
+            <div className="flex flex-col gap-2">
+              {data.education.map((edu, i) => (
+                <div key={i}>
+                  <p className="font-bold text-gray-900 leading-tight" style={{ fontSize: "11px" }}>{edu.degree}</p>
+                  <p className="text-violet-600 leading-tight" style={{ fontSize: "9px" }}>
+                    {edu.school} | {edu.startDate} — {edu.endDate}
+                  </p>
+                  {edu.description && (
+                    <p className="text-gray-500 leading-relaxed mt-0.5" style={{ fontSize: "9px" }}>{edu.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 }
-
-doc.fillColor("white").fontSize(18).font("Helvetica-Bold")
-  .text(cv.name || "", 15, sidebarY, { width: sidebarWidth - 30, align: "center" }); // ✅ nombre centrado
-sidebarY = doc.y + 6;
-
-doc.fontSize(10).font("Helvetica").fillColor("rgba(255,255,255,0.7)")
-  .text(cv.email || "", 15, sidebarY, { width: sidebarWidth - 30, align: "center" }); // ✅ email centrado
-sidebarY = doc.y + 10;
-
-  // Redes en sidebar
-  if (cv.linkedin || cv.github || cv.portfolio) {
-    doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")
-      .text("CONTACTO", 15, sidebarY, { width: sidebarWidth - 30 });
-    sidebarY = doc.y + 4;
-    if (cv.linkedin) {
-      doc.fontSize(9).font("Helvetica").fillColor("white")
-        .text(`in  ${cv.linkedin}`, 15, sidebarY, { width: sidebarWidth - 30 });
-      sidebarY = doc.y + 2;
-    }
-    if (cv.github) {
-      doc.fontSize(9).font("Helvetica").fillColor("white")
-        .text(`gh  ${cv.github}`, 15, sidebarY, { width: sidebarWidth - 30 });
-      sidebarY = doc.y + 2;
-    }
-    if (cv.portfolio) {
-      doc.fontSize(9).font("Helvetica").fillColor("white")
-        .text(`web  ${cv.portfolio}`, 15, sidebarY, { width: sidebarWidth - 30 });
-      sidebarY = doc.y + 2;
-    }
-    sidebarY += 8;
-  }
-
-  if (cv.skills) {
-    doc.fontSize(10).font("Helvetica-Bold").fillColor("rgba(255,255,255,0.5)")
-      .text("HABILIDADES", 15, sidebarY, { width: sidebarWidth - 30 });
-    sidebarY = doc.y + 4;
-    const skillsList = cv.skills.split(",").map(s => s.trim()).filter(Boolean);
-    skillsList.forEach(skill => {
-      doc.fontSize(11).font("Helvetica").fillColor("white")
-        .text(`• ${skill}`, 15, sidebarY, { width: sidebarWidth - 30 });
-      sidebarY = doc.y;
-    });
-  }
-
-  const mainX = sidebarWidth + 24;
-  const mainWidth = 595 - sidebarWidth - 48;
-  let y = 40;
-
-  if (cv.summary) {
-    doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)
-      .text("PERFIL PROFESIONAL", mainX, y);
-    y += 16;
-    doc.fontSize(11).font("Helvetica").fillColor("#374151")
-      .text(cv.summary, mainX, y, { width: mainWidth });
-    y = doc.y + 18;
-    doc.moveTo(mainX, y).lineTo(mainX + mainWidth, y).stroke("#e5e7eb");
-    y += 14;
-  }
-
-  if (cv.experience?.length > 0) {
-    doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)
-      .text("EXPERIENCIA", mainX, y);
-    y += 16;
-    cv.experience.forEach(exp => {
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827")
-        .text(exp.position || "", mainX, y, { width: mainWidth });
-      y = doc.y + 2;
-      doc.fontSize(11).font("Helvetica").fillColor(accentColor)
-        .text(`${exp.company}  |  ${exp.startDate} — ${exp.endDate}`, mainX, y);
-      y = doc.y + 6;
-      if (exp.description) {
-        doc.fontSize(11).font("Helvetica").fillColor("#6b7280")
-          .text(exp.description, mainX, y, { width: mainWidth });
-        y = doc.y + 12;
-      }
-    });
-    y += 6;
-    doc.moveTo(mainX, y).lineTo(mainX + mainWidth, y).stroke("#e5e7eb");
-    y += 14;
-  }
-
-  if (cv.education?.length > 0) {
-    doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor)
-      .text("EDUCACIÓN", mainX, y);
-    y += 16;
-    cv.education.forEach(edu => {
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827")
-        .text(edu.degree || "", mainX, y, { width: mainWidth });
-      y = doc.y + 2;
-      doc.fontSize(11).font("Helvetica").fillColor(accentColor)
-        .text(`${edu.school}  |  ${edu.startDate} — ${edu.endDate}`, mainX, y);
-      y = doc.y + 6;
-      if (edu.description) {
-        doc.fontSize(11).font("Helvetica").fillColor("#6b7280")
-          .text(edu.description, mainX, y, { width: mainWidth });
-        y = doc.y + 12;
-      }
-    });
-  }
-}
-
 // ── Plantilla 2: Ejecutiva Oscura ─────────────────────────
 function renderMinimalista(doc, cv) {
   const margin = 50;

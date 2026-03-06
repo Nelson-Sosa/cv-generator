@@ -7,6 +7,7 @@ export default function App() {
   const [cvData, setCvData] = useState(null);
   const [template, setTemplate] = useState("plantilla1");
   const [openFAQ, setOpenFAQ] = useState(null);
+  
 
   const handleDownloadPDF = async () => {
     try {
