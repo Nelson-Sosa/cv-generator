@@ -7,6 +7,7 @@ export default function App() {
   const [cvData, setCvData] = useState(null);
   const [template, setTemplate] = useState("plantilla1");
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [language, setLanguage] = useState("es");
   
 
   const handleDownloadPDF = async () => {
@@ -87,13 +88,15 @@ export default function App() {
             setCvData={setCvData}
             template={template}
             setTemplate={setTemplate}
+             language={language}        // ← agregar
+             setLanguage={setLanguage}  // ← agregar
           />
         </div>
 
         {/* Preview card */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-gray-200 mb-4">Vista previa</h2>
-          <PreviewCV cvData={cvData} template={template} />
+          <PreviewCV cvData={cvData} template={template} language={language} />
           {cvData && (
             <button
               onClick={handleDownloadPDF}

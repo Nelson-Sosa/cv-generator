@@ -29,43 +29,59 @@ const mockData = {
   skills: "React, JavaScript, TypeScript, CSS, Git, Figma"
 };
 
-// ── Plantilla 1: Moderna Azul — fiel al PDF ────────────────
-function PreviewPlantilla1({ data }) {
+// ── Traducciones ───────────────────────────────────────────
+const labels = {
+  es: {
+    profile: "Perfil Profesional",
+    experience: "Experiencia",
+    education: "Educación",
+    skills: "Habilidades",
+    contact: "Contacto",
+  },
+  en: {
+    profile: "Professional Profile",
+    experience: "Experience",
+    education: "Education",
+    skills: "Skills",
+    contact: "Contact",
+  }
+};
+
+// ── Plantilla 1: Moderna Azul ──────────────────────────────
+function PreviewPlantilla1({ data, language = "es" }) {
+  const t = labels[language];
   const initials = data.name?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl flex" style={{ minHeight: "500px" }}>
+    <div className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl flex" style={{ height: "600px" }}>
 
-      {/* Sidebar violeta */}
-      <div className="bg-violet-700 flex flex-col items-center px-3 py-5 gap-3" style={{ width: "34%" }}>
+      {/* Sidebar azul */}
+      <div className="flex flex-col items-center px-3 py-5 gap-3 overflow-y-auto" style={{ width: "36%", backgroundColor: "#4f46e5" }}>
 
-        {/* Foto o iniciales */}
         {data.photo ? (
           <img src={data.photo} alt="Foto"
-            className="w-20 h-20 rounded-full object-cover border-2 border-violet-300 flex-shrink-0" />
+            className="w-20 h-20 rounded-full object-cover border-2 border-indigo-300 flex-shrink-0" />
         ) : (
-          <div className="w-20 h-20 rounded-full border-2 border-violet-300 flex-shrink-0 flex items-center justify-center bg-white/20">
+          <div className="w-20 h-20 rounded-full border-2 border-indigo-300 flex-shrink-0 flex items-center justify-center bg-white/20">
             <span className="text-2xl font-bold text-white">{initials}</span>
           </div>
         )}
 
         <h2 className="text-sm font-bold text-white text-center leading-tight">{data.name}</h2>
-        <p className="text-xs text-violet-200 text-center break-all">{data.email}</p>
+        <p className="text-xs text-center break-all" style={{ color: "rgba(255,255,255,0.7)" }}>{data.email}</p>
 
-        {/* Contacto */}
         {(data.linkedin || data.github || data.portfolio) && (
           <div className="w-full mt-1">
-            <p className="text-xs font-bold text-violet-300 uppercase tracking-widest mb-1">Contacto</p>
-            {data.linkedin && <p className="text-xs text-white break-all">in {data.linkedin}</p>}
-            {data.github && <p className="text-xs text-white break-all">gh {data.github}</p>}
-            {data.portfolio && <p className="text-xs text-white break-all">web {data.portfolio}</p>}
+            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>{t.contact}</p>
+            {data.linkedin && <p className="text-xs text-white break-all">in  {data.linkedin}</p>}
+            {data.github && <p className="text-xs text-white break-all">gh  {data.github}</p>}
+            {data.portfolio && <p className="text-xs text-white break-all">web  {data.portfolio}</p>}
           </div>
         )}
 
-        {/* Habilidades */}
         {data.skills && (
           <div className="w-full mt-1">
-            <p className="text-xs font-bold text-violet-300 uppercase tracking-widest mb-1">Habilidades</p>
+            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>{t.skills}</p>
             {data.skills.split(",").map((s, i) => (
               <p key={i} className="text-xs text-white">• {s.trim()}</p>
             ))}
@@ -74,11 +90,11 @@ function PreviewPlantilla1({ data }) {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 px-4 py-5 flex flex-col gap-4">
+      <div className="flex-1 px-4 py-5 flex flex-col gap-4 overflow-y-auto">
 
         {data.summary && (
           <div>
-            <p className="text-xs font-bold text-violet-700 uppercase tracking-widest mb-1">Perfil Profesional</p>
+            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#4f46e5" }}>{t.profile}</p>
             <p className="text-xs text-gray-600 leading-relaxed">{data.summary}</p>
             <div className="mt-2 border-t border-gray-200" />
           </div>
@@ -86,12 +102,12 @@ function PreviewPlantilla1({ data }) {
 
         {data.experience?.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-violet-700 uppercase tracking-widest mb-2">Experiencia</p>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#4f46e5" }}>{t.experience}</p>
             <div className="flex flex-col gap-2">
               {data.experience.map((exp, i) => (
                 <div key={i}>
                   <p className="text-sm font-bold text-gray-900">{exp.position}</p>
-                  <p className="text-xs text-violet-600">{exp.company} | {exp.startDate} — {exp.endDate}</p>
+                  <p className="text-xs" style={{ color: "#7c3aed" }}>{exp.company} | {exp.startDate} — {exp.endDate}</p>
                   {exp.description && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{exp.description}</p>}
                 </div>
               ))}
@@ -102,12 +118,12 @@ function PreviewPlantilla1({ data }) {
 
         {data.education?.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-violet-700 uppercase tracking-widest mb-2">Educación</p>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#4f46e5" }}>{t.education}</p>
             <div className="flex flex-col gap-2">
               {data.education.map((edu, i) => (
                 <div key={i}>
                   <p className="text-sm font-bold text-gray-900">{edu.degree}</p>
-                  <p className="text-xs text-violet-600">{edu.school} | {edu.startDate} — {edu.endDate}</p>
+                  <p className="text-xs" style={{ color: "#7c3aed" }}>{edu.school} | {edu.startDate} — {edu.endDate}</p>
                   {edu.description && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{edu.description}</p>}
                 </div>
               ))}
@@ -120,14 +136,14 @@ function PreviewPlantilla1({ data }) {
   );
 }
 
-// ── Plantilla 2: Ejecutiva Oscura — fiel al PDF ────────────
-function PreviewPlantilla2({ data }) {
+// ── Plantilla 2: Ejecutiva Oscura ──────────────────────────
+function PreviewPlantilla2({ data, language = "es" }) {
+  const t = labels[language];
   const initials = data.name?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
 
   return (
     <div className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl">
 
-      {/* Header oscuro */}
       <div className="bg-gray-900 px-6 py-5">
         <div className="flex items-center gap-4">
           {data.photo ? (
@@ -149,7 +165,6 @@ function PreviewPlantilla2({ data }) {
         </div>
       </div>
 
-      {/* Franja azul */}
       <div className="h-1 bg-blue-600" />
 
       <div className="p-6 flex flex-col gap-5">
@@ -158,7 +173,7 @@ function PreviewPlantilla2({ data }) {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-4 bg-blue-600 rounded" />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">Perfil Profesional</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">{t.profile}</h3>
             </div>
             <p className="text-sm text-gray-600 leading-relaxed">{data.summary}</p>
           </div>
@@ -168,7 +183,7 @@ function PreviewPlantilla2({ data }) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-1 h-4 bg-blue-600 rounded" />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">Experiencia</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">{t.experience}</h3>
             </div>
             <div className="flex flex-col gap-3">
               {data.experience.map((exp, i) => (
@@ -191,7 +206,7 @@ function PreviewPlantilla2({ data }) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-1 h-4 bg-blue-600 rounded" />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">Educación</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">{t.education}</h3>
             </div>
             <div className="flex flex-col gap-3">
               {data.education.map((edu, i) => (
@@ -214,7 +229,7 @@ function PreviewPlantilla2({ data }) {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-4 bg-blue-600 rounded" />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">Habilidades</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-800">{t.skills}</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {data.skills.split(",").map((skill, i) => (
@@ -229,14 +244,14 @@ function PreviewPlantilla2({ data }) {
   );
 }
 
-// ── Plantilla 3: Ejecutiva Verde — fiel al PDF ─────────────
-function PreviewPlantilla3({ data }) {
+// ── Plantilla 3: Ejecutiva Verde ───────────────────────────
+function PreviewPlantilla3({ data, language = "es" }) {
+  const t = labels[language];
   const initials = data.name?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
 
   return (
     <div className="bg-white text-gray-900 rounded-xl overflow-hidden shadow-xl">
 
-      {/* Header verde */}
       <div className="bg-green-800 px-6 py-4">
         <div className="flex items-center gap-4">
           {data.photo ? (
@@ -263,12 +278,11 @@ function PreviewPlantilla3({ data }) {
         </div>
       </div>
 
-      {/* Contenido */}
       <div className="px-6 py-4 flex flex-col gap-4">
 
         {data.summary && (
           <div>
-            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-1">Perfil</p>
+            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-1">{t.profile}</p>
             <p className="text-xs text-gray-600 leading-relaxed">{data.summary}</p>
             <div className="mt-3 border-t border-green-100" />
           </div>
@@ -276,14 +290,12 @@ function PreviewPlantilla3({ data }) {
 
         {data.experience?.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-2">Experiencia</p>
+            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-2">{t.experience}</p>
             <div className="flex flex-col gap-3">
               {data.experience.map((exp, i) => (
                 <div key={i}>
                   <p className="text-sm font-bold text-gray-900">{exp.position}</p>
-                  <p className="text-xs text-green-600 font-medium">
-                    {exp.company} · {exp.startDate} — {exp.endDate}
-                  </p>
+                  <p className="text-xs text-green-600 font-medium">{exp.company} · {exp.startDate} — {exp.endDate}</p>
                   {exp.description && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{exp.description}</p>}
                 </div>
               ))}
@@ -294,14 +306,12 @@ function PreviewPlantilla3({ data }) {
 
         {data.education?.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-2">Educación</p>
+            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-2">{t.education}</p>
             <div className="flex flex-col gap-3">
               {data.education.map((edu, i) => (
                 <div key={i}>
                   <p className="text-sm font-bold text-gray-900">{edu.degree}</p>
-                  <p className="text-xs text-green-600 font-medium">
-                    {edu.school} · {edu.startDate} — {edu.endDate}
-                  </p>
+                  <p className="text-xs text-green-600 font-medium">{edu.school} · {edu.startDate} — {edu.endDate}</p>
                   {edu.description && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{edu.description}</p>}
                 </div>
               ))}
@@ -311,7 +321,7 @@ function PreviewPlantilla3({ data }) {
 
         {data.skills && (
           <div>
-            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-1">Habilidades</p>
+            <p className="text-xs font-bold text-green-800 uppercase tracking-widest mb-1">{t.skills}</p>
             <p className="text-xs text-gray-600">
               {data.skills.split(",").map(s => s.trim()).filter(Boolean).join(", ")}
             </p>
@@ -344,20 +354,20 @@ function DemoWrapper({ isDemo, children }) {
   );
 }
 
-export default function PreviewCV({ cvData, template = "plantilla1" }) {
+export default function PreviewCV({ cvData, template = "plantilla1", language = "es" }) {
   const data = cvData || mockData;
   const isDemo = !cvData;
 
   if (template === "plantilla1") {
-    return <DemoWrapper isDemo={isDemo}><PreviewPlantilla1 data={data} /></DemoWrapper>;
+    return <DemoWrapper isDemo={isDemo}><PreviewPlantilla1 data={data} language={language} /></DemoWrapper>;
   }
 
   if (template === "plantilla2") {
-    return <DemoWrapper isDemo={isDemo}><PreviewPlantilla2 data={data} /></DemoWrapper>;
+    return <DemoWrapper isDemo={isDemo}><PreviewPlantilla2 data={data} language={language} /></DemoWrapper>;
   }
 
   if (template === "plantilla3") {
-    return <DemoWrapper isDemo={isDemo}><PreviewPlantilla3 data={data} /></DemoWrapper>;
+    return <DemoWrapper isDemo={isDemo}><PreviewPlantilla3 data={data} language={language} /></DemoWrapper>;
   }
 
   return null;

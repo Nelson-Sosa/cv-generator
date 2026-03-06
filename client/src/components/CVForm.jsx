@@ -4,7 +4,7 @@ import EducationInput from "./EducationInput";
 import TemplateSelector from "./TemplateSelector";
 import { generateCV } from "../api";
 
-export default function CVForm({ cvData, setCvData, template, setTemplate }) {
+export default function CVForm({ cvData, setCvData, template, setTemplate, language, setLanguage }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -45,7 +45,8 @@ const progress = Math.round((completedFields / totalFields) * 100);
     const res = await generateCV(
       { name, email, linkedin, github, portfolio, photo, summary, experience, education, skills },
       template,
-      true
+      true,
+      language 
     );
     // ✅ Preserva las redes que el backend no devuelve
     setCvData({
@@ -302,6 +303,34 @@ const validateField = (name, value) => {
       <div className="border-t border-gray-800 pt-4">
         <TemplateSelector selected={template} setSelected={setTemplate} />
       </div>
+      
+<div className="border-t border-gray-800 pt-4">
+  <label className={labelClass}>Idioma del CV</label>
+  <div className="flex gap-3">
+    <button
+      type="button"
+      onClick={() => setLanguage("es")}
+      className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition ${
+        language === "es"
+          ? "bg-violet-600 border-violet-600 text-white"
+          : "bg-gray-800 border-gray-700 text-gray-400 hover:border-violet-500"
+      }`}
+    >
+      🇦🇷 Español
+    </button>
+    <button
+      type="button"
+      onClick={() => setLanguage("en")}
+      className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition ${
+        language === "en"
+          ? "bg-violet-600 border-violet-600 text-white"
+          : "bg-gray-800 border-gray-700 text-gray-400 hover:border-violet-500"
+      }`}
+    >
+      🇺🇸 English
+    </button>
+  </div>
+</div>
 
       <button
         type="submit"
